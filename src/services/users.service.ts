@@ -17,9 +17,29 @@ export class UsersService {
   }
 
   async getAllUsers() {
-    const users = await this.userRepository.findAll();
+    const users = await this.userRepository.findAll({
+      attributes: {
+        exclude: ['password'],
+      },
+    });
 
     return users;
+  }
+
+  async getUserById(id: string) {
+    const user = await this.userRepository.findByPk(id, {
+      attributes: {
+        exclude: ['password'],
+      },
+    });
+
+    return user;
+  }
+
+  async getUserByPhone(phone: string) {
+    const user = await this.userRepository.findOne({ where: { phone } });
+
+    return user;
   }
 
   async addContact(id: string, { userId }: AddContactDto) {
