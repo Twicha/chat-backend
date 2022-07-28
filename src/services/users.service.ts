@@ -6,20 +6,44 @@ import { AddContactDto, CreateUserDto } from 'src/dto';
 
 import { User } from 'src/models';
 
+const colorItems = ['red', 'orange', 'violet', 'green', 'cyan', 'blue', 'pink'];
+
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userRepository: typeof User) {}
 
   async createUser(dto: CreateUserDto) {
-    const user = await this.userRepository.create(dto);
+    const color = colorItems[Math.floor(Math.random() * colorItems.length)];
+
+    const user = await this.userRepository.create({ ...dto, color });
 
     return user;
   }
 
   async getAllUsers() {
-    const users = await this.userRepository.findAll();
+    const users = await this.userRepository.findAll({
+      attributes: {
+        exclude: ['password'],
+      },
+    });
 
     return users;
+  }
+
+  async getUserById(id: string) {
+    const user = await this.userRepository.findByPk(id, {
+      attributes: {
+        exclude: ['password'],
+      },
+    });
+
+    return user;
+  }
+
+  async getUserByPhone(phone: string) {
+    const user = await this.userRepository.findOne({ where: { phone } });
+
+    return user;
   }
 
   async addContact(id: string, { userId }: AddContactDto) {

@@ -5,6 +5,9 @@ import { Column, DataType, Model, Table } from 'sequelize-typescript';
 interface UserCreationAttrs {
   phone: string;
   password: string;
+  firstName: string;
+  lastName: string;
+  color: string;
 }
 
 @Table({ tableName: 'users' })
@@ -33,6 +36,26 @@ export class User extends Model<User, UserCreationAttrs> {
   phone: string;
 
   @ApiProperty({
+    example: 'Иван',
+    description: 'Имя пользователя',
+  })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  firstName: string;
+
+  @ApiProperty({
+    example: 'Иванов',
+    description: 'Фамилия пользователя',
+  })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  lastName: string;
+
+  @ApiProperty({
     example: '12345678',
     description: 'Пароль',
   })
@@ -50,6 +73,16 @@ export class User extends Model<User, UserCreationAttrs> {
     type: DataType.STRING,
   })
   avatar: string;
+
+  @ApiProperty({
+    example: 'green',
+    description: 'Цвет пользователя',
+  })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  color: string;
 
   @ApiProperty({
     example: [

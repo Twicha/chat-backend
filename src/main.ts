@@ -9,6 +9,8 @@ async function start() {
 
   const app = await NestFactory.create(AppModule);
 
+  app.enableCors();
+
   const config = new DocumentBuilder()
     .setTitle('Урок по продвинутому BACKEND')
     .setDescription('Документация REST API')
