@@ -33,6 +33,26 @@ export class User extends Model<User, UserCreationAttrs> {
   phone: string;
 
   @ApiProperty({
+    example: 'Иван',
+    description: 'Имя пользователя',
+  })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  firstName: string;
+
+  @ApiProperty({
+    example: 'Иванов',
+    description: 'Фамилия пользователя',
+  })
+  @Column({
+    type: DataType.STRING,
+    allowNull: false,
+  })
+  lastName: string;
+
+  @ApiProperty({
     example: '12345678',
     description: 'Пароль',
   })

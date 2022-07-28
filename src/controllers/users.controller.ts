@@ -28,6 +28,13 @@ export class UsersController {
     return this.usersService.getAllUsers();
   }
 
+  @ApiOperation({ summary: 'Получение пользователя по ID' })
+  @ApiResponse({ status: 200, type: User })
+  @Get('/:id')
+  getById(@Param('id') id: string) {
+    return this.usersService.getUserById(id);
+  }
+
   @ApiOperation({ summary: 'Добавление контакта' })
   @ApiResponse({ status: 200, type: User })
   @Post('/:id/contacts')
