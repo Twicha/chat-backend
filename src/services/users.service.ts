@@ -6,12 +6,16 @@ import { AddContactDto, CreateUserDto } from 'src/dto';
 
 import { User } from 'src/models';
 
+const colorItems = ['red', 'orange', 'violet', 'green', 'cyan', 'blue', 'pink'];
+
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User) private userRepository: typeof User) {}
 
   async createUser(dto: CreateUserDto) {
-    const user = await this.userRepository.create(dto);
+    const color = colorItems[Math.floor(Math.random() * colorItems.length)];
+
+    const user = await this.userRepository.create({ ...dto, color });
 
     return user;
   }
