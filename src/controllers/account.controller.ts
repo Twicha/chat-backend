@@ -4,7 +4,7 @@ import { ApiTags } from '@nestjs/swagger';
 
 import { IncomingHttpHeaders } from 'http';
 
-import { UpdateAccountDto } from 'src/dto';
+import { AddContactDto, DeleteContactDto, UpdateAccountDto } from 'src/dto';
 
 import { AccountService } from 'src/services';
 
@@ -24,5 +24,21 @@ export class AccountController {
     @Headers() headers: IncomingHttpHeaders,
   ) {
     return this.accountService.updateAccount(dto, headers);
+  }
+
+  @Put('/contacts/add')
+  addContact(
+    @Body() dto: AddContactDto,
+    @Headers() headers: IncomingHttpHeaders,
+  ) {
+    return this.accountService.addContact(dto, headers);
+  }
+
+  @Put('/contacts/delete')
+  deleteContact(
+    @Body() dto: DeleteContactDto,
+    @Headers() headers: IncomingHttpHeaders,
+  ) {
+    return this.accountService.deleteContact(dto, headers);
   }
 }

@@ -1,8 +1,14 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+import { JwtService } from '@nestjs/jwt';
 
 import { InjectModel } from '@nestjs/sequelize';
 
-import { AddContactDto, CreateUserDto } from 'src/dto';
+import { IncomingHttpHeaders } from 'http';
+
+import { FindAttributeOptions, Op, WhereOptions } from 'sequelize';
+
+import { CreateUserDto } from 'src/dto';
 
 import { User } from 'src/models';
 
@@ -10,7 +16,10 @@ const colorItems = ['red', 'orange', 'violet', 'green', 'cyan', 'blue', 'pink'];
 
 @Injectable()
 export class UsersService {
-  constructor(@InjectModel(User) private userRepository: typeof User) {}
+  constructor(
+    @InjectModel(User) private userRepository: typeof User,
+    private jwtService: JwtService,
+  ) {}
 
   async createUser(dto: CreateUserDto) {
     const color = colorItems[Math.floor(Math.random() * colorItems.length)];
@@ -20,21 +29,56 @@ export class UsersService {
     return user;
   }
 
-  async getAllUsers() {
+  async getAllUsers(query: any, headers?: IncomingHttpHeaders) {
+    const tokenUser = this.getTokenData(headers);
+
+    const { phone, ids } = query;
+
+    const attributes: FindAttributeOptions = {
+      exclude: ['password'],
+    };
+
+    const where: WhereOptions<User> = {};
+
+    if (tokenUser) {
+      where.id = {
+        [Op.not]: tokenUser.id,
+      };
+
+      attributes.exclude = [...attributes.exclude, 'contacts'];
+    }
+
+    if (phone) {
+      where.phone = {
+        [Op.substring]: phone,
+      };
+    }
+
+    if (ids) {
+      where.id = ids.split(',');
+    }
+
     const users = await this.userRepository.findAll({
-      attributes: {
-        exclude: ['password'],
-      },
+      where,
+      attributes,
     });
 
     return users;
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string, headers?: IncomingHttpHeaders) {
+    const tokenUser = this.getTokenData(headers);
+
+    const attributes: FindAttributeOptions = {
+      exclude: ['password'],
+    };
+
+    if (tokenUser) {
+      attributes.exclude = [...attributes.exclude, 'contacts'];
+    }
+
     const user = await this.userRepository.findByPk(id, {
-      attributes: {
-        exclude: ['password'],
-      },
+      attributes,
     });
 
     return user;
@@ -46,22 +90,15 @@ export class UsersService {
     return user;
   }
 
-  async addContact(id: string, { userId }: AddContactDto) {
-    const user = await this.userRepository.findByPk(id);
-
-    const hasContact: boolean = user.contacts.includes(userId);
-
-    if (hasContact) {
-      throw new HttpException(
-        'Данный контакт уже добавлен',
-        HttpStatus.CONFLICT,
-      );
+  private getTokenData(headers?: IncomingHttpHeaders) {
+    if (!headers) {
+      return;
     }
 
-    user.set('contacts', [...user.contacts, userId]);
+    const authHeader = headers.authorization;
 
-    await user.save();
+    const token = authHeader.split(' ')[1];
 
-    return user;
+    return this.jwtService.verify<User>(token);
   }
 }

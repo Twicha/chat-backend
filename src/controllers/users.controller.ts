@@ -1,8 +1,18 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { AddContactDto, CreateUserDto } from 'src/dto';
+import { IncomingHttpHeaders } from 'http';
+
+import { CreateUserDto } from 'src/dto';
 
 import { User } from 'src/models';
 
@@ -24,21 +34,14 @@ export class UsersController {
   @ApiOperation({ summary: 'Получение всех пользователей' })
   @ApiResponse({ status: 200, type: [User] })
   @Get()
-  getAll() {
-    return this.usersService.getAllUsers();
+  getAll(@Query() query: any, @Headers() headers: IncomingHttpHeaders) {
+    return this.usersService.getAllUsers(query, headers);
   }
 
   @ApiOperation({ summary: 'Получение пользователя по ID' })
   @ApiResponse({ status: 200, type: User })
   @Get('/:id')
-  getById(@Param('id') id: string) {
-    return this.usersService.getUserById(id);
-  }
-
-  @ApiOperation({ summary: 'Добавление контакта' })
-  @ApiResponse({ status: 200, type: User })
-  @Post('/:id/contacts')
-  addContact(@Param('id') id: string, @Body() dto: AddContactDto) {
-    return this.usersService.addContact(id, dto);
+  getById(@Param('id') id: string, @Headers() headers: IncomingHttpHeaders) {
+    return this.usersService.getUserById(id, headers);
   }
 }
