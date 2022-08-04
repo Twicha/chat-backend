@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { IncomingHttpHeaders } from 'http';
 
-import { UpdateAccountDto } from 'src/dto';
+import { UpdateAccountDto, AddContactDto, DeleteContactDto } from 'src/dto';
 
 import { User } from 'src/models';
 
@@ -45,6 +45,51 @@ export class AccountService {
     });
 
     return user;
+  }
+
+  async addContact({ userId }: AddContactDto, headers: IncomingHttpHeaders) {
+    const { id } = this.getTokenData(headers);
+
+    const user = await this.userService.getUserById(id);
+
+    const hasContact: boolean = user.contacts.includes(userId);
+
+    if (hasContact) {
+      throw new HttpException(
+        'Данный контакт уже добавлен',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    user.contacts = [...user.contacts, userId];
+
+    await user.save();
+
+    return user.contacts;
+  }
+
+  async deleteContact(
+    { userId }: DeleteContactDto,
+    headers: IncomingHttpHeaders,
+  ) {
+    const { id } = this.getTokenData(headers);
+
+    const user = await this.userService.getUserById(id);
+
+    const hasContact: boolean = user.contacts.includes(userId);
+
+    if (!hasContact) {
+      throw new HttpException(
+        'Данного контакта нет в списке ваших контактов',
+        HttpStatus.CONFLICT,
+      );
+    }
+
+    user.contacts = user.contacts.filter((contact) => contact !== userId);
+
+    await user.save();
+
+    return user.contacts;
   }
 
   private getTokenData(headers: IncomingHttpHeaders) {
